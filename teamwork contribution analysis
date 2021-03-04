@@ -1,0 +1,77 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import re
+
+## you can download your chat data from kakaotalk application
+
+talk = open("C:\\Users\\jooye\\OneDrive\\문서\\카카오톡 받은 파일\\grouptalk.txt", "rt", encoding = "utf-8")
+talklist = talk.readlines()
+talk.close()
+## take a look at the data
+print(talklist[0:10])
+print(len(talklist))
+
+## cleanse the text
+def cleaner(string):
+    new = string.replace("\n", " ")
+    new = new.strip()
+    return new
+realtalk = [cleaner(k) for k in talklist]
+print(realtalk[0:10])
+
+# make a dataframe that consists of two variables: who and what
+# We'll see who said what in the data
+who = []
+what = []
+for i in range(len(realtalk)):
+    string = realtalk[i]
+    sender = string.split("] [")[0][1:]
+    itemlist = string.split("] ")[2:]
+    item = ' '.join(itemlist)
+    what.append(item)
+    who.append(sender)
+talkdf = pd.DataFrame({"who" : who, "what": what})
+
+print(talkdf[1:10])
+
+cleanlist = []
+for v in talkdf.values:
+    if len(v[0])==3:  ## we only need text that has the sender name and the content. this code removes other redundant text such as time.
+        cleanlist.append(v)
+
+senderlist = [x[0] for x in cleanlist]
+msglist = [x[1] for x in cleanlist]
+
+df = pd.DataFrame({"who": senderlist, "what": msglist})
+
+print(senderlist[0:20])
+
+# substituted the real names as A, B, C and D, due to privacy issues ;)
+names = ['A', 'B', 'C', 'D']
+
+occrdict = {}
+for person in names:
+    c = senderlist.count(person)
+    occrdict[person] = c
+
+# Korean characters often cause error, so I import the Korean font here to prevent it
+import matplotlib
+import matplotlib.font_manager as fm
+font_location = 'C:\WINDOWS\FONTS\MALGUN.TTF'
+font_name = fm.FontProperties(fname=font_location).get_name()
+matplotlib.rc('font', family = font_name)
+
+countresult = df.groupby('who').count()
+countresult
+result = df.groupby('who').sum()
+result["length"] = [len(x) for x in result["what"]]
+result
+
+plt.bar(['A', 'B', 'C', 'D'], countresult['what'])
+plt.title("톡방 발언횟수 그래프") ## how many kakaotalk messages each member has sent
+plt.show()
+
+
+## When you feel you're doing too much work in a team project, or somebody in your team seems to be a free-rider, you can use this code to check 
+## how much each member has contributed to the group talk via Kakaotalk. 
