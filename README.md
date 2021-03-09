@@ -1,3 +1,3 @@
-# kakao-analysis
+# python-practices
 
-This is a simple project where I analyze the chat data from my Kakaotalk. 
+개인적으로 짜 왔던 파이썬 코드들을 올려놓는 repository입니다.
